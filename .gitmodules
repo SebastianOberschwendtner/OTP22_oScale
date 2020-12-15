@@ -1,0 +1,3 @@
+[submodule "05_Doc"]
+	path = 05_Doc
+	url = https://github.com/knuffel-v2/OTP22_oScale.wiki.git
