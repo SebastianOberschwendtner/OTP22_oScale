@@ -1,4 +1,4 @@
-![Card](../../wiki/01_Logos/Header_oScale_v001.png)
+![Card](../../wiki/01_Logo/Header_oScale_v001.png)
 # OTP22_oScale
 
 
