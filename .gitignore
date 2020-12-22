@@ -1,6 +1,9 @@
 # Ignore the raw cad files
 10_CAD
 
+# Ignore CM Exports
+20_CM_Exports
+
 # ignore platformio outputs
 .pio
 
