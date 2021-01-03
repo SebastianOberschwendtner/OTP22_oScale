@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    scheduler.c
  * @author  SO
- * @version V1.0
+ * @version V1.0.0
  * @date    17-April-2020
  * @brief   Scheduler to implement a simple timing of tasks.
  ******************************************************************************
@@ -29,12 +29,14 @@
 // ****** Includes ******
 #include "scheduler.h"
 
-volatile schedule_t os;
+volatile schedule_t os; // Struct which contains the timing data for all scheduled tasks.
 
-/*
- * initialize the os struct
+/**
+ * @brief Initialize the os struct. 
+ * The SysTick periode is used to calculate the schedule of the tasks in us.
+ * @param SysTick_us The periode of the SysTick timer in us.
  */
-void init_scheduler(void)
+void scheduler_init(unsigned char SysTick_us)
 {
 	//register memory
 	// os = ipc_memory_register(sizeof(schedule_t),did_SCHEDULER);
@@ -44,14 +46,17 @@ void init_scheduler(void)
 	{
 		os.active[count]	= 0; //Task is not active
 		os.flag[count]		= 0; //No task wants to run
-		os.timer[count]	= 0; //Reset the timer of the task
+		os.timer[count]	    = 0; //Reset the timer of the task
 		os.schedule[count]	= 0; //Reset the schedule of the task
 	}
 	os.loop_ovf = 0; //No loop overflow occurred
+	os.tick_time = SysTick_us;
 };
 
-/*
- * schedule one task, the task is automatically set active!
+/**
+ * @brief Schedule one task, the task is automatically set active!
+ * @param task The number of the task(group).
+ * @param schedule The schedule of the task as a multiple of the SysTick ticks.
  */
 void schedule(unsigned char task, unsigned int schedule)
 {
@@ -60,46 +65,86 @@ void schedule(unsigned char task, unsigned int schedule)
 	os.timer[task]	  = schedule - 1; //Reload the timer
 };
 
-/*
- * Set a task active or inactive
+/**
+ * @brief Schedule one task in us, the task is automatically set active!
+ * @param task The number of the task(group).
+ * @param schedule_us The schedule of the task in us.
+ * @details The scheduler has to initialized with the correct SysTick time in
+ * order for this scheduling to work.
+ */
+void schedule_us(unsigned char task, unsigned int schedule_us)
+{
+	// Calculate the schedule of the task
+	unsigned int _schedule = (schedule_us / os.tick_time);
+
+	// Apply the schedule
+	schedule(task, _schedule);
+};
+
+/**
+ * @brief Schedule one task in ms, the task is automatically set active!
+ * @param task The number of the task(group).
+ * @param schedule_ms The schedule of the task in ms.
+ * @details The scheduler has to initialized with the correct SysTick time in
+ * order for this scheduling to work.
+ */
+void schedule_ms(unsigned char task, unsigned int schedule_ms)
+{
+	// Calculate the schedule of the task
+	unsigned long l_schedule = 0;
+	l_schedule += schedule_ms;
+	l_schedule *= 1000;
+	l_schedule /= os.tick_time;
+
+	// Apply the schedule
+	schedule(task, (unsigned int) l_schedule);
+};
+
+/**
+ * @brief Set a task active or inactive.
+ * @param task The number of the task(group).
+ * @param state The new state of the task. (ACTIVE or INACTIVE)
  */
 void set_task(unsigned char task, unsigned char state)
 {
 	os.active[task] = state;
 };
 
-/*
- * get the state of a task
+/**
+ * @brief Get the state of a task.
+ * @param task The number of the task(group).
+ * @return The state of the task. (ACTIVE or INACTIVE)
  */
 unsigned char get_task(unsigned char task)
 {
 	return os.active[task];
 };
 
-/*
- * Calculate the run flag for one task
+/**
+ * @brief Calculate the run flag for one task.
+ * @param task The number of the task(group).
  */
 void count_task(unsigned char task)
 {
 	if(os.active[task]) 	//only execute when task is active
 	{
-		if(os.timer[task] == 0) //When the timer is finished, the task wants to execute
-		{
-			os.timer[task] = os.schedule[task]; //Reload the timer with the schedule value
-			os.flag[task] = 1;	//Set the flag for the task
-		}
-		else					//when the timer is not finished, the task does not want to run
+		if(os.timer[task]) //When the timer is finished, the task wants to execute
 		{
 			os.timer[task]--;	  	//update the timer count
 			// os.flag[task] = 0;	//Do not set the flag
+		}
+		else //when the timer is not finished, the task does not want to run
+		{
+			os.timer[task] = os.schedule[task]; //Reload the timer with the schedule value
+			os.flag[task] = 1;	//Set the flag for the task
 		}
 	}
 	else
 		os.flag[task] = 0;	//Do not set the flag
 };
 
-/*
- * calculate the scheduling
+/**
+ * @brief Calculate the scheduling for all tasks.
  */
 void run_scheduler(void)
 {
@@ -107,12 +152,14 @@ void run_scheduler(void)
 		count_task(task);
 };
 
-/*
- * Perform the scheduling and decide whether to run the specified task
+/**
+ * @brief Perform the scheduling and decide whether to run the specified task.
+ * @param task The number of the task(group).
+ * @return Returns 1 when the task wants to and is allowed to run.
  */
 unsigned char run(unsigned char task)
 {
-	//Check whether the task is scheduled tor un
+	//Check whether the task is scheduled to run
 	if (os.flag[task])
 	{
 		os.flag[task] = 0; 	//Reset the flag of the task
@@ -122,8 +169,9 @@ unsigned char run(unsigned char task)
 		return 0;			//Task does not want to run
 };
 
-/*
- * indicate whether a loop overflow occurred
+/**
+ * @brief Indicates whether a loop overflow occurred.
+ * @return Returns 1 when an overflow occurred.
  */
 unsigned char schedule_overflow(void)
 {

@@ -43,7 +43,7 @@ dispDat_t datDisp;  // Content data for display
  */ 
 inline void disp_SetA0High(void)
 {
-    PORTDISP |= (1<<DISP_A0);
+    PORT_A0 |= (1<<DISP_A0);
 };
 
 /**
@@ -52,7 +52,7 @@ inline void disp_SetA0High(void)
  */ 
 inline void disp_SetA0Low(void)
 {
-    PORTDISP &= ~(1<<DISP_A0);
+    PORT_A0 &= ~(1<<DISP_A0);
 };
 
 /**
@@ -171,6 +171,7 @@ void disp_Init(void)
     case 0:
         // Initialize the I/Os
         DDRDISP = 0xFF; //All Pin are outputs
+        DDR_A0 |= (1<<DISP_A0); // DISP_A0 is also an output
         disp_SetCSHigh();
         disp_SetRSTLow();
 
@@ -793,4 +794,28 @@ unsigned char disp_CallByReference(unsigned char cmd, char* pointer)
         return 1;
     }
     return 0;
-}
+};
+
+/**
+ * @brief Set the BKL pin high. Enabling the backlight of the display.
+ */ 
+void disp_BacklightON(void)
+{
+    PORTDISP |= (1<<DISP_BKL);
+};
+
+/**
+ * @brief Set the BKL pin low. Disabling the backlight of the display.
+ */ 
+void disp_BacklightOFF(void)
+{
+    PORTDISP &= ~(1<<DISP_BKL);
+};
+
+/**
+ * @brief Toggle the backlight of the display.
+ */ 
+void disp_BacklightToggle(void)
+{
+    PORTDISP ^= (1<<DISP_BKL);
+};

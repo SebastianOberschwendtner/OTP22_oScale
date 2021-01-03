@@ -27,43 +27,75 @@
  ******************************************************************************
  */
 // ****** Includes ******
-#include <avr/io.h>
 #include "oScale.h"
 
+// ****** Variables ******
+volatile unsigned char TickPassed = 0;
+
+// ****** Main ******
 int main(void)
 {
   //Initialize system
   scale_InitTask();
-  SetTriggerHigh();
+  scale_InitSysTick();
 
   // Initialize tasks
-  disp_InitTask(90);
+  disp_InitTask(TASK0_us);
   gui_InitTask();
   adc_InitTask();
 
   // Schedule tasks
-  schedule(TASK0, 25);
-  schedule(TASK1, 25000);
-  SetTriggerLow();
+  scheduler_init(SYSTICK_us);
+  schedule_us(TASK0, TASK0_us);
+  schedule_ms(TASK1, TASK1_ms);
+  schedule_ms(TASK2, TASK2_ms);
 
-  while(1)
+  // Start SysTick Timer
+  sei();
+  scale_StartSysTick();
+
+  while (1)
   {
-    // Run the scheduler
-    run_scheduler();
+    if (TickPassed)
+    {
+      TickPassed = 0;
+      // ****** TASK0 (5 kHz) ******
+      if (run(TASK0))
+      {
+        Task_Disp();
+        Task_GUI();
+      }
 
-    if (run(TASK0))
-    {
-      //Execute display task
-      Task_ADC();
-      Task_Disp();
+      // ****** TASK1 (100 Hz) ******
+      if (run(TASK1))
+      {
+        Task_ADC();
+      }
+
+      // ****** TASK2 (5 Hz) ******
+      if (run(TASK2))
+      {
+        GUI_Draw(GUI_SCREEN_MANUAL);
+      }
     }
-    if (run(TASK1))
-    {
-      SetTriggerHigh();
-      // Execute the display task
-      Task_GUI();
-      SetTriggerLow();
-    }
+
+    // ****** free-running ******
+    if (scale_GetKeyPressed() == 2)
+      disp_BacklightToggle();
+
+    if (scale_GetKeyPressed() == 4)
+      scale_SetONLow();
   }
   return 0;
-}
+};
+
+//****** Interrupts ******
+/**
+ * @brief SysTick interrupt for Systick variable.
+ * @details Interrupt-handler
+ */
+ISR(TIMER0_COMPA_vect)
+{
+  TickPassed = 1;
+  run_scheduler();
+};

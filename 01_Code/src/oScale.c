@@ -47,8 +47,9 @@ void scale_InitTask(void)
     datScale.time = 754; // [s]
     datScale.battery = 50; // [%]
 
-    // Init the trigger output
-    InitTrigger();
+    // Initialize IOs
+    DDR_IO |= (1<<SW_ON); // ON is Output
+    scale_SetONHigh(); // Keep the system running!
 };
 
 /**
@@ -62,33 +63,82 @@ ScaleDat_t* Scale_GetIPC(void)
 };
 
 /**
- * @brief Initialize the trigger output
+ * @brief Set the SW_ON output high.
  */
-void InitTrigger(void)
+void scale_SetONHigh(void)
 {
-    DDRD |= (1<<PD7);
-}
-
-/**
- * @brief Set the trigger output high.
- */
-void SetTriggerHigh(void)
-{
-    PORTD |= (1<<PD7);
+    PORT_IO |= (1<<SW_ON);
 };
 
 /**
- * @brief Set the trigger output low.
+ * @brief Set the SW_ON output low.
  */
-void SetTriggerLow(void)
+void scale_SetONLow(void)
 {
-    PORTD &= ~(1<<PD7);
+    PORT_IO &= ~(1<<SW_ON);
 };
 
 /**
- * @brief Toggle the trigger output.
+ * @brief Read the key inputs and return which key is pressed.
+ * @return The key number or sum of key numbers which are pressed.
+ * @todo Add support for when multiple keys are pressed at once.
  */
-void ToggleTrigger(void)
+unsigned char scale_GetKeyPressed(void)
 {
-    PORTD ^= (1<<PD7);
+    unsigned char _key = 0;
+    // Key0 pressed?
+    if (PIN_IO & (1<<KEY0))
+        _key += 1;
+    // Key1 pressed?
+    if (PIN_IO & (1<<KEY1))
+        _key += 2;
+    // Key2 pressed?
+    if (PIN_IO & (1<<KEY2))
+        _key += 3;
+    // Key3 pressed?
+    if (PIN_IO & (1<<KEY3))
+        _key += 4;
+    return _key;
+};
+
+/**
+ * @brief Initialize the SysTick timer. TIM0 is used for that.
+ */
+void scale_InitSysTick(void)
+{
+    /*
+     * Initialize TIM0:
+     * - CTC Mode (Mode 2, Set WGM01)
+     * - Prescaler: /8 (Set CS01)
+     * - Interrupt at OCF0A (Set Ser OCIE0A)
+     */
+    TCCR0A = (1<<WGM01);
+    TIMSK0 = (1<<OCIE0A);
+
+    /* 
+     * Calculate the reload value.
+     * The calculation is split to optimize it for the 8-bit architecture.
+     */
+#ifndef SYSTICK_us
+#error "SYSTICK_us is not defined!"
+#endif
+    OCR0A = (unsigned char)( (SYSTICK_us*F_CPU) / (8*1000000) );
+};
+
+/**
+ * @brief Start the SysTick timer. Interrupts have to enabled!
+ */
+void scale_StartSysTick(void)
+{
+    // Start TIM0 by setting the prescaler bit.
+    TCCR0B = (1<<CS01);
+};
+
+/**
+ * @brief Stop the SysTick timer.
+ */
+void scale_StopSysTick(void)
+{
+    // Start TIM0 by deleting the prescaler bit.
+    TCCR0B = 0;
 };

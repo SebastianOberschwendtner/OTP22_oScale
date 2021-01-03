@@ -27,17 +27,21 @@
 #define GUI_LINE_VALUES 4 // The line where the values are displayed
 #define GUI_LINE_UNITS  7 // The line where the units are displayed
 
+// Screens to display
+#define GUI_SCREEN_MANUAL   GUI_CMD_MANUAL  // The screen during manual operation
+
 // Arbiter Commands
 #define GUI_CMD_INIT    1 // Initialize the GUI Screen
-#define GUI_CMD_NORMAL  2 // Display the data during normal operation
+#define GUI_CMD_MANUAL  2 // Display the data during manual operation
 
 // ****** Functions ******
 void            Task_GUI            (void);
 void            gui_InitTask        (void);
 void            gui_Init            (void);
-void            gui_NormalDisplay   (void);
+void            gui_DisplayManual   (void);
 unsigned char   gui_WriteString     (unsigned char x, unsigned char line, char *buffer);
 unsigned char   gui_WriteWeight     (void);
 unsigned char   gui_WriteTime       (void);
 unsigned char   gui_WriteBattery    (void);
+unsigned char   GUI_Draw            (unsigned char screen);
 #endif

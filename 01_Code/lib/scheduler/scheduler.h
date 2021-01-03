@@ -24,11 +24,12 @@
 // #include "system.h"
 
 //How many tasks do you want?
-#define NUM_TASKS	2
+#define NUM_TASKS	3
 
 //struct for task information
 typedef struct
 {
+	unsigned char tick_time;			//The scheduled periode of the SysTick timer.
 	unsigned char active[NUM_TASKS];	//Flag whether task should be executed at all
 	unsigned char flag[NUM_TASKS];		//Flag when task wants to run
 	unsigned int timer[NUM_TASKS];		//Timer for each task
@@ -37,14 +38,14 @@ typedef struct
 } schedule_t;
 
 //defines for task bits
-#define TASK0		0
-#define TASK1		1
-#define TASK2		2
-#define TASK3		3
-#define TASK4		4
-#define TASK5		5
-#define TASK6		6
-#define TASK7		7
+#define TASK0		0 // Taskgroup 0
+#define TASK1		1 // Taskgroup 1
+#define TASK2		2 // Taskgroup 2
+#define TASK3		3 // Taskgroup 3
+#define TASK4		4 // Taskgroup 4
+#define TASK5		5 // Taskgroup 5
+#define TASK6		6 // Taskgroup 6
+#define TASK7		7 // Taskgroup 7
 
 //State defines
 #define INACTIVE	0
@@ -57,8 +58,11 @@ typedef struct
 /*
  * Functional protoypes
  */
-void			init_scheduler		(void);
+
+void			scheduler_init		(unsigned char SysTick_us);
 void			schedule			(unsigned char task, unsigned int schedule);
+void 			schedule_us			(unsigned char task, unsigned int schedule_us);
+void 			schedule_ms			(unsigned char task, unsigned int schedule_ms);
 void 			set_task			(unsigned char task, unsigned char state);
 unsigned char 	get_task			(unsigned char task);
 void 			count_task			(unsigned char task);

@@ -80,7 +80,7 @@ unsigned int adc_Sample(void)
     * Each bit is stored in a char to achieve a consistent timing in the acquire for loop.
     * -> the execution time of bitshifting is dependent on the amount of bits to shift.
     */
-    unsigned char buffer[15];
+    unsigned char digitbuffer[15];
     unsigned int value = 0;
 
     // Activate the adc, CS Low, CLK low
@@ -93,22 +93,31 @@ unsigned int adc_Sample(void)
         // CLK High
         PORTADC |= (1<<ADC_CLK);
         // Wait for a few CPU ticks
-        for (unsigned char wait = 0; wait < 2; wait++);
+        for (unsigned char wait = 0; wait < 1; wait++);
         //Sample input
-        if (PINADC & (1<<ADC_DATA))
-            buffer[tick-1] = 1;
-        else
-            buffer[tick-1] = 0;
+        digitbuffer[tick-1] = (PINADC & (1<<ADC_DATA))>0;
         // Clk Low
         PORTADC &= ~(1<<ADC_CLK);
         // Wait for a few CPU ticks
-        for (unsigned char wait = 0; wait < 12; wait++);
+        for (unsigned char wait = 0; wait < 3; wait++);
     }
     PORTADC |= (1<<ADC_CS);// | (1<<ADC_CLK);
 
-    // Translate the buffer to an actual integer result
-    for (unsigned char tick = 0; tick < 12; tick++)
-        value += (buffer[tick] << tick);
+    // Translate the buffer to an actual integer result (unrolled loop):
+    // for (unsigned char tick = 0; tick < 12; tick++)
+    //     value += (buffer[tick] << tick);
+    value += digitbuffer[0]*1U;
+    value += digitbuffer[1]*2U;
+    value += digitbuffer[2]*4U;
+    value += digitbuffer[3]*8U;
+    value += digitbuffer[4]*16U;
+    value += digitbuffer[5]*32U;
+    value += digitbuffer[6]*64U;
+    value += digitbuffer[7]*128U;
+    value += digitbuffer[8]*256U;
+    value += digitbuffer[9]*512U;
+    value += digitbuffer[10]*1024U;
+    value += digitbuffer[11]*2048U;
     
     return value;
 }

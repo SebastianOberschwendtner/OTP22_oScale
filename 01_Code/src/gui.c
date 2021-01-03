@@ -31,7 +31,13 @@
 
 // ****** Variables ******
 task_t taskGUI; // Task struct for GUI
-char buffer[16]; // Buffer for display string
+char buffer1[16]; // Buffer1 for display string
+char buffer2[16]; // Buffer2 for display string
+/*
+ => double buffering is used, because the GUI does not know when the display is finished
+ sending the data. Otherwise the GUI would override the conten of the buffer while it
+ is sent.
+ */
 ScaleDat_t* datGUI;  // Pointer to the system data.
 
 // ****** Functions ******
@@ -56,8 +62,8 @@ void Task_GUI(void)
         gui_Init();
         break;
 
-    case GUI_CMD_NORMAL:
-        gui_NormalDisplay();
+    case GUI_CMD_MANUAL:
+        gui_DisplayManual();
         break;
 
     default:
@@ -87,13 +93,13 @@ void gui_Init(void)
     {
         case 0:
             // Write the header line
-            if (gui_WriteString(0, 0, strcpy(buffer, "oScale")))
+            if (gui_WriteString(0, 0, strcpy(buffer1, "oScale")))
                 taskGUI.sequence++;
             break;
 
         case 1:
-            // Write verion to the header line
-            if (gui_WriteString(9, 0, strcpy(buffer, VERSION)))
+            // Write version to the header line
+            if (gui_WriteString(9, 0, strcpy(buffer2, VERSION)))
                 taskGUI.sequence++;
             break;
 
@@ -112,32 +118,32 @@ void gui_Init(void)
 
         case 4:
             // Write the weight descriptor
-            if (gui_WriteString(0, 2, strcpy(buffer, "Weight")))
+            if (gui_WriteString(0, 2, strcpy(buffer1, "Weight")))
                 taskGUI.sequence++;
             break;
 
         case 5:
             // Write the Time descriptor
-            if (gui_WriteString(11, 2, strcpy(buffer, "Time")))
+            if (gui_WriteString(11, 2, strcpy(buffer2, "Time")))
                 taskGUI.sequence++;
             break;
 
         case 6:
             // Write the weight units
-            if (gui_WriteString(0, GUI_LINE_UNITS, strcpy(buffer, "[g]")))
+            if (gui_WriteString(0, GUI_LINE_UNITS, strcpy(buffer1, "[g]")))
                 taskGUI.sequence++;
             break;
 
         case 7:
             // Write the weight units
-            if (gui_WriteString(11, GUI_LINE_UNITS, strcpy(buffer, "[min]  [s]")))
+            if (gui_WriteString(11, GUI_LINE_UNITS, strcpy(buffer2, "[min]  [s]")))
                 taskGUI.sequence++;
             break;
 
         case 8:
             // Command ist finished
             sarb_return(&taskGUI);
-            taskGUI.command = GUI_CMD_NORMAL;
+            taskGUI.command = GUI_CMD_MANUAL;
             break;
 
         default:
@@ -148,7 +154,7 @@ void gui_Init(void)
 /**
  * @brief Perform the normal GUI operation.
  */
-void gui_NormalDisplay(void)
+void gui_DisplayManual(void)
 {
     // Perform the command sequence
     switch (taskGUI.sequence)
@@ -168,7 +174,7 @@ void gui_NormalDisplay(void)
     case 2:
         // Display the passed time
         if(gui_WriteBattery())
-            taskGUI.sequence = 0;
+            sarb_return(&taskGUI);
         break;
 
     default:
@@ -213,26 +219,26 @@ unsigned char gui_WriteWeight(void)
         // Digit 0
         _digit = _weight / 1000;
         _weight -= 1000 * _digit;
-        buffer[0] = (unsigned char)(_digit + 48);
+        buffer1[0] = (unsigned char)(_digit + 48);
         // Digit 1
         _digit = _weight / 100;
         _weight -= 100 * _digit;
-        buffer[1] = (unsigned char)(_digit + 48);
+        buffer1[1] = (unsigned char)(_digit + 48);
         // Digit 2
         _digit = _weight / 10;
         _weight -= 10 * _digit;
-        buffer[2] = (unsigned char)(_digit + 48);
-        buffer[3] = '.';
+        buffer1[2] = (unsigned char)(_digit + 48);
+        buffer1[3] = '.';
         // Digit 3
-        buffer[4] = (unsigned char)(_weight + 48);
-        buffer[5] = 0;
+        buffer1[4] = (unsigned char)(_weight + 48);
+        buffer1[5] = 0;
 
         // Set cursor
         disp_SetCursorX(1);
         disp_SetLine(GUI_LINE_VALUES);
 
         // Write the content
-        return disp_CallByReference(DISP_CMD_WRITE_NUMBER, buffer);
+        return disp_CallByReference(DISP_CMD_WRITE_NUMBER, buffer1);
     }
     return 0;
 };
@@ -252,27 +258,27 @@ unsigned char gui_WriteTime(void)
         // Digit 0
         _digit = _time / 600;
         _time -= 600 * _digit;
-        buffer[0] = (unsigned char)(_digit + 48);
+        buffer2[0] = (unsigned char)(_digit + 48);
         // Digit 1
         _digit = _time / 60;
         _time -= 60 * _digit;
-        buffer[1] = (unsigned char)(_digit + 48);
-        buffer[2] = ':';
+        buffer2[1] = (unsigned char)(_digit + 48);
+        buffer2[2] = ':';
         // Digit 2
         _digit = _time / 10;
         _time -= 10 * _digit;
-        buffer[3] = (unsigned char)(_digit + 48);
+        buffer2[3] = (unsigned char)(_digit + 48);
         
         // Digit 3
-        buffer[4] = (unsigned char)(_time + 48);
-        buffer[5] = 0;
+        buffer2[4] = (unsigned char)(_time + 48);
+        buffer2[5] = 0;
 
         // Set cursor
         disp_SetCursorX(12);
         disp_SetLine(GUI_LINE_VALUES);
 
         // Write the content
-        return disp_CallByReference(DISP_CMD_WRITE_NUMBER, buffer);
+        return disp_CallByReference(DISP_CMD_WRITE_NUMBER, buffer2);
     }
     return 0;
 };
@@ -292,6 +298,27 @@ unsigned char gui_WriteBattery(void)
 
         // Write the content
         return disp_CallByValue(DISP_CMD_WRITE_CHAR, 7 + (datGUI->battery/25), 0, 0);
+    }
+    return 0;
+};
+
+/**
+ * @brief Trigger the GUI task to write the screen.
+ * @param screen The type of screen to display.
+ * @return Returns 1 when screen write was successfully triggered.
+ */
+unsigned char GUI_Draw(unsigned char screen)
+{
+    //Only call command when no other command is active
+    if (taskGUI.command == 0)
+    {
+        // Set the commands data
+        taskGUI.argument[0] = 0;
+        taskGUI.argument[1] = 0;
+        taskGUI.argument[2] = 0;
+        taskGUI.command     = screen;
+        taskGUI.sequence    = 0;
+        return 1;
     }
     return 0;
 };

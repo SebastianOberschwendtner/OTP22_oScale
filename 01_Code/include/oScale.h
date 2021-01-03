@@ -21,31 +21,61 @@
 #define OSCALE_H_
 
 // ****** Includes ******
+// AVR
+#include <avr/io.h>
+#include <avr/interrupt.h>
+// STD Libs
 #include <string.h>
+// oScale Libs
 #include <scheduler.h>
 #include <sarb.h>
 #include <disp.h>
+// oScale specific
 #include "gui.h"
 #include "adc.h"
 
 // ****** Defines ******
 #define VERSION "v1.0.0"
 
+/*
+ * Task Schedule
+ * The schedules of the tasks HAVE to be greater than the SysTick schedule!
+ * The schedules of the tasks should be a multiple of the SysTick schedule.
+ * The maximum schedule for one task is limited by the schedule byte size: 16bit!
+ * => Schedule_Max_us = (2^16 - 1) * SYSTICK_us
+ */
+#define SYSTICK_us  200U     // SysTick interrupt is every 200 us (5 kHz)
+#define TASK0_us    200U     // Run TASK0 every 200 us (5 kHz)
+#define TASK1_ms    10U      // Run TASK1 every 10 ms (100 Hz)
+#define TASK2_ms    500U     // Run TASK2 every 200 ms (5 Hz)
+
+// pins
+#define DDR_IO      DDRD
+#define PORT_IO     PORTD
+#define PIN_IO      PIND
+
+#define SW_ON       PD1
+#define KEY0        PD0
+#define KEY1        PD2
+#define KEY2        PD3
+#define KEY3        PD4
+
 // Struct for scale data
 typedef struct
 {
-    unsigned int weight;
-    unsigned int time;
-    unsigned char battery;
+    unsigned int weight;    // Measured weight in [g]
+    unsigned int time;      // Elapsed time in [s]
+    unsigned char battery;  // Battery Soc in [%]
 } ScaleDat_t;
 
 
 // ****** Functions ******
-void        scale_InitTask  (void);
-ScaleDat_t* Scale_GetIPC    (void);
-void        InitTrigger     (void);
-void        SetTriggerHigh  (void);
-void        SetTriggerLow   (void);
-void        ToggleTrigger   (void);
-
+void            scale_InitTask          (void);
+ScaleDat_t*     Scale_GetIPC            (void);
+void            scale_SetONHigh         (void);
+void            scale_SetONLow          (void);
+unsigned char   scale_GetKeyPressed     (void);
+void            scale_InitSysTick       (void);
+void            scale_StartSysTick      (void);
+void            scale_StopSysTick       (void);
 #endif

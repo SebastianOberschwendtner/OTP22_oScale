@@ -41,11 +41,14 @@ typedef struct   // Content data for display
 // Pin assignment
 #define DDRDISP     DDRB    // Data direction register for display
 #define PORTDISP    PORTB   // The port of the display
+#define DDR_A0      DDRC    // Data direction register of the DISP_A0 pin
+#define PORT_A0     PORTC   // The port of the DISP_A0 pin
 #define DISP_CS     PB2     // Chip select
-#define DISP_A0     PB1     // Decides whether command or data is send
+#define DISP_A0     PC1     // Decides whether command or data is send
 #define DISP_SDI    PB3     // Serial Data Line
 #define DISP_SCK    PB5     // Serial Clock Line
 #define DISP_RST    PB0     // Reset pin of display
+#define DISP_BKL    PB1     // Enables the backlight of the display
 
 // Display Control Commands
 #define DISP_CTRL_ON        0b10101110  // Enable or Disable the LCD display
@@ -95,4 +98,7 @@ void            disp_SetCursorX             (unsigned char x);
 void            disp_SetLine                (unsigned char line);
 unsigned char   disp_CallByValue            (unsigned char cmd, unsigned char arg0, unsigned char arg1, unsigned char arg2);
 unsigned char   disp_CallByReference        (unsigned char cmd, char* pointer);
+void            disp_BacklightON            (void);
+void            disp_BacklightOFF           (void);
+void            disp_BacklightToggle        (void);
 #endif

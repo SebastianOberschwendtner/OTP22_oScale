@@ -27,9 +27,9 @@
 #define DDRADC      DDRD
 #define PORTADC     PORTD
 #define PINADC      PIND
-#define ADC_CS      PD2
-#define ADC_DATA    PD3
-#define ADC_CLK     PD4
+#define ADC_CS      PD5
+#define ADC_DATA    PD6
+#define ADC_CLK     PD7
 
 // ****** Functions ******
 void            Task_ADC                (void);
