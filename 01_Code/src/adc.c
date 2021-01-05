@@ -31,7 +31,7 @@
 
 // ****** Variables ******
 task_t taskADC; // Task struct for task data
-ScaleDat_t* tempdat;
+Filter_t ADCFilter;   // The filter struct for the ADC data.
 
 // ****** Functions ******
 
@@ -48,7 +48,7 @@ ScaleDat_t* tempdat;
  */
 void Task_ADC(void)
 {
-    tempdat->weight = 4000 - adc_Sample();
+    FilterPT1(adc_Sample(), &ADCFilter);
 };
 
 /**
@@ -62,11 +62,19 @@ void adc_InitTask(void)
     // Configure the peripherals
     DDRADC |= (1<<ADC_CS) | (1<<ADC_CLK);
     DDRADC &= ~(1<<ADC_DATA);
-
     PORTADC |= (1<<ADC_CS);
 
-    tempdat = Scale_GetIPC();
-
+    /* Initialize Filter for ADC Data:
+     * - Type: PT1
+     * - F_Sample: 100 Hz
+     * - Time Constant: 1 s
+     */
+    ADCFilter.Accumulated = 0;
+    ADCFilter.SampleCount = 0;
+    ADCFilter.Value       = 0;
+    ADCFilter.Coefficient[0] = (100 * 1);
+    ADCFilter.Coefficient[1] = 0;
+    ADCFilter.Coefficient[2] = 0;
 };
 
 /**
@@ -120,4 +128,13 @@ unsigned int adc_Sample(void)
     value += digitbuffer[11]*2048U;
     
     return value;
-}
+};
+
+/**
+ * @brief Read the current filtered adc value.
+ * @return The current filtered value.
+ */
+unsigned int adc_GetValue(void)
+{
+    return ADCFilter.Value;
+};

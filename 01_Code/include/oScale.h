@@ -30,6 +30,7 @@
 #include <scheduler.h>
 #include <sarb.h>
 #include <disp.h>
+#include <filter8.h>
 // oScale specific
 #include "gui.h"
 #include "adc.h"
@@ -47,7 +48,9 @@
 #define SYSTICK_us  200U     // SysTick interrupt is every 200 us (5 kHz)
 #define TASK0_us    200U     // Run TASK0 every 200 us (5 kHz)
 #define TASK1_ms    10U      // Run TASK1 every 10 ms (100 Hz)
-#define TASK2_ms    500U     // Run TASK2 every 200 ms (5 Hz)
+#define TASK2_ms    200U     // Run TASK2 every 200 ms (5 Hz)
+
+#define GUI_DRAW_RATE   2    // Update GUI every n TaskTicks of Task_SYS
 
 // pins
 #define DDR_IO      DDRD
@@ -60,22 +63,51 @@
 #define KEY2        PD3
 #define KEY3        PD4
 
+// System states
+#define SYS_STATE_INIT      1
+#define SYS_STATE_IDLE      2
+#define SYS_STATE_MANUAL    3
+#define SYS_STATE_SETTINGS  4
+#define SYS_STATE_SHUTDOWN  5
+
 // Struct for scale data
+#pragma pack(push, 1)
 typedef struct
 {
-    unsigned int weight;    // Measured weight in [g]
-    unsigned int time;      // Elapsed time in [s]
-    unsigned char battery;  // Battery Soc in [%]
+    unsigned int Weight;    // Measured weight in [g]
+    unsigned int Time;      // Elapsed time in [s]
+    unsigned int FlowRate;  // Current Flow Rate in [g/s]
+    unsigned char SoC;      // Battery Soc in [%]
 } ScaleDat_t;
+#pragma pack(pop)
 
+// Struct for system data
+#pragma pack(push, 1)
+typedef struct 
+{
+    unsigned char State;            // The state variable of the task
+    unsigned char ScreenGUI;        // The current screen of the GUI
+    unsigned char CounterGUI;       // Counter for timing of the drawing of the GUI
+    unsigned char KeyState[2];      // Contains the old and new state of the keys
+    unsigned char Calibration[2];   // Calibration coefficients
+    unsigned int WeightOffset;      // The current offset of the weight, used for zeroing the scale
+} SysDat_t;
+#pragma pack(pop)
 
 // ****** Functions ******
+void            Task_SYS                (void);
+void            scale_StateManual       (void);
+void            scale_StateShutdown     (void);
 void            scale_InitTask          (void);
 ScaleDat_t*     Scale_GetIPC            (void);
 void            scale_SetONHigh         (void);
 void            scale_SetONLow          (void);
 unsigned char   scale_GetKeyPressed     (void);
+void            scale_SaveKeyState      (void);
 void            scale_InitSysTick       (void);
 void            scale_StartSysTick      (void);
 void            scale_StopSysTick       (void);
+void            scale_UpdateGUI         (void);
+void            scale_ConvertSample     (void);
+void            scale_GetSoC            (void);
 #endif

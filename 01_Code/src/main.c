@@ -75,16 +75,11 @@ int main(void)
       // ****** TASK2 (5 Hz) ******
       if (run(TASK2))
       {
-        GUI_Draw(GUI_SCREEN_MANUAL);
+        Task_SYS();
       }
     }
 
     // ****** free-running ******
-    if (scale_GetKeyPressed() == 2)
-      disp_BacklightToggle();
-
-    if (scale_GetKeyPressed() == 4)
-      scale_SetONLow();
   }
   return 0;
 };

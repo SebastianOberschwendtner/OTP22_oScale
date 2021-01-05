@@ -595,7 +595,7 @@ void disp_WriteChar(void)
 };
 
 /**
- * @brief Write a digit with the digit font to the display RAM.
+ * @brief Write a single digit with the digit font to the display RAM.
  * @param arg[0] The digit to be displayed.
  */
 void disp_WriteDigit(void)

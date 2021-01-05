@@ -44,4 +44,5 @@ unsigned char   gui_WriteWeight     (void);
 unsigned char   gui_WriteTime       (void);
 unsigned char   gui_WriteBattery    (void);
 unsigned char   GUI_Draw            (unsigned char screen);
+char*           GUI_Num2Str         (char* dest, unsigned int int_number, unsigned char precision);
 #endif

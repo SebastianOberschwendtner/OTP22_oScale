@@ -35,7 +35,7 @@ char buffer1[16]; // Buffer1 for display string
 char buffer2[16]; // Buffer2 for display string
 /*
  => double buffering is used, because the GUI does not know when the display is finished
- sending the data. Otherwise the GUI would override the conten of the buffer while it
+ sending the data. Otherwise the GUI would override the content of the buffer while it
  is sent.
  */
 ScaleDat_t* datGUI;  // Pointer to the system data.
@@ -44,7 +44,7 @@ ScaleDat_t* datGUI;  // Pointer to the system data.
 
 /**
  **********************************************************
- * @brief TASK DISP
+ * @brief TASK GUI
  **********************************************************
  * The GUI task.
  * 
@@ -99,7 +99,7 @@ void gui_Init(void)
 
         case 1:
             // Write version to the header line
-            if (gui_WriteString(9, 0, strcpy(buffer2, VERSION)))
+            if (gui_WriteString(8, 0, strcpy(buffer2, VERSION)))
                 taskGUI.sequence++;
             break;
 
@@ -210,7 +210,7 @@ unsigned char gui_WriteString(unsigned char x, unsigned char line, char *buffer)
  */
 unsigned char gui_WriteWeight(void)
 {
-    unsigned int _weight = datGUI->weight;
+    unsigned int _weight = datGUI->Weight;
     unsigned int _digit = 0;
     //When display is not busy
     if (!disp_IsBusy())
@@ -249,7 +249,7 @@ unsigned char gui_WriteWeight(void)
  */
 unsigned char gui_WriteTime(void)
 {
-    unsigned int _time = datGUI->time;
+    unsigned int _time = datGUI->Time;
     unsigned int _digit = 0;
     //When display is not busy
     if (!disp_IsBusy())
@@ -293,11 +293,19 @@ unsigned char gui_WriteBattery(void)
     if (!disp_IsBusy())
     {
         // Set cursor
-        disp_SetCursorX(20);
+        disp_SetCursorX(16);
         disp_SetLine(0);
 
+        // Get the SoC
+        GUI_Num2Str(buffer1, datGUI->SoC, 2);
+        buffer1[2] = '%';
+        buffer1[3] = ' ';
+        buffer1[4] = 7 + (datGUI->SoC/25);
+        buffer1[5] = 0;
+
+
         // Write the content
-        return disp_CallByValue(DISP_CMD_WRITE_CHAR, 7 + (datGUI->battery/25), 0, 0);
+        return disp_CallByReference(DISP_CMD_WRITE_STRING, buffer1);
     }
     return 0;
 };
@@ -321,4 +329,34 @@ unsigned char GUI_Draw(unsigned char screen)
         return 1;
     }
     return 0;
+};
+
+/**
+ * @brief Save the specified integer as a number string to a string buffer.
+ * The destination buffer has to be long enough to contain the digits!
+ * @param dest Pointer to the destination buffer.
+ * @param int_number The integer number to convert.
+ * @param precision The number of digits to convert.
+ * @return Returns the pointer address of the modified destination string.
+ */
+char* GUI_Num2Str(char* dest, unsigned int int_number, unsigned char precision)
+{
+    // Temporary variables
+    unsigned int i_buffer = int_number;
+    unsigned char ch_digit = 0;
+    
+    // Repeat for every digit
+    for (unsigned char digit = precision; digit > 0; digit--)
+    {
+        // Get the current digit
+        ch_digit = i_buffer % 10;
+        i_buffer /= 10;
+
+        // Save the digit to the buffer
+        *(dest+(digit-1)) = ch_digit + 48;
+    }
+
+    // Terminate and return the string
+    *(dest + precision) = 0;
+    return dest;
 };

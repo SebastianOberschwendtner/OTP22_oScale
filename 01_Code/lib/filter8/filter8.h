@@ -17,24 +17,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
-#ifndef ADC_H_
-#define ADC_H_
-// ****** Includes ******
-#include "oScale.h"
+#ifndef FILTER8_H_
+#define FILTER8_H_
 
 // ****** Defines ******
-// IOs
-#define DDRADC      DDRD
-#define PORTADC     PORTD
-#define PINADC      PIND
-#define ADC_CS      PD5
-#define ADC_DATA    PD6
-#define ADC_CLK     PD7
-
+// Struct for filtered data
+#pragma pack(push, 1)
+typedef struct
+{
+    unsigned int Value;         // The current value of the filter
+    unsigned long Accumulated;  // Accumulated data, also used as "calculation space"
+    unsigned char SampleCount;  // The number of accumulated samples 
+    unsigned int Coefficient[3];// Filter coefficients
+} Filter_t;
 
 // ****** Functions ******
-void            Task_ADC                (void);
-void            adc_InitTask            (void);
-unsigned int    adc_Sample              (void);
-unsigned int    adc_GetValue            (void);
+void        FilterAVG           (unsigned int i_Sample_New, Filter_t* p_Filter);
+void        FilterPT1           (unsigned int i_Sample_New, Filter_t* p_Filter);
 #endif
