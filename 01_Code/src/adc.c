@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    adc.c
  * @author  SO
- * @version V1.0
+ * @version V1.0.0
  * @date    22-November-2020
  * @brief   Interfaces with the ADS7822P 12-bit ADC.
  ******************************************************************************
@@ -67,12 +67,12 @@ void adc_InitTask(void)
     /* Initialize Filter for ADC Data:
      * - Type: PT1
      * - F_Sample: 100 Hz
-     * - Time Constant: 1 s
+     * - Time Constant: 0.5 s
      */
-    ADCFilter.Accumulated = 0;
+    ADCFilter.Accumulated = (4096<<4); // Initialize the filter value for faster settling.
     ADCFilter.SampleCount = 0;
     ADCFilter.Value       = 0;
-    ADCFilter.Coefficient[0] = (100 * 1);
+    ADCFilter.Coefficient[0] = (100 * 0.5);
     ADCFilter.Coefficient[1] = 0;
     ADCFilter.Coefficient[2] = 0;
 };

@@ -74,7 +74,7 @@
 #pragma pack(push, 1)
 typedef struct
 {
-    unsigned int Weight;    // Measured weight in [g]
+    signed int Weight;      // Measured weight in [g]
     unsigned int Time;      // Elapsed time in [s]
     unsigned int FlowRate;  // Current Flow Rate in [g/s]
     unsigned char SoC;      // Battery Soc in [%]
@@ -89,8 +89,8 @@ typedef struct
     unsigned char ScreenGUI;        // The current screen of the GUI
     unsigned char CounterGUI;       // Counter for timing of the drawing of the GUI
     unsigned char KeyState[2];      // Contains the old and new state of the keys
-    unsigned char Calibration[2];   // Calibration coefficients
-    unsigned int WeightOffset;      // The current offset of the weight, used for zeroing the scale
+    signed int Calibration[2];   // Calibration coefficients
+    signed int WeightOffset;      // The current offset of the weight, used for zeroing the scale
 } SysDat_t;
 #pragma pack(pop)
 
@@ -108,6 +108,6 @@ void            scale_InitSysTick       (void);
 void            scale_StartSysTick      (void);
 void            scale_StopSysTick       (void);
 void            scale_UpdateGUI         (void);
-void            scale_ConvertSample     (void);
+int             scale_ConvertSample     (unsigned int i_Sample);
 void            scale_GetSoC            (void);
 #endif

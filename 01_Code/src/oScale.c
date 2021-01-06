@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    oScale.c
  * @author  SO
- * @version V1.0
+ * @version V1.0.0
  * @date    21-November-2020
  * @brief   Housekeeping/System functions of teh oScale
  ******************************************************************************
@@ -33,6 +33,8 @@
 task_t taskScale;  // The task struct of the scale task.
 ScaleDat_t datScale; // The scale data
 SysDat_t oScale;    // The system data of the scale
+
+unsigned char temp_timer_enable = 0;
 
 // ****** Functions ******
 
@@ -90,7 +92,13 @@ void Task_SYS(void)
 void scale_StateManual(void)
 {
     // Get the measured weight
-    scale_ConvertSample();
+    /** @todo The calibration has to use something else than
+     * a linear calibration curve. For now the simple approch works,
+     * but is only precise to +-1g.
+     */
+    // datScale.Weight = scale_ConvertSample( adc_GetValue() );
+    datScale.Weight = 0x1000 - adc_GetValue();
+    datScale.Weight -= oScale.WeightOffset;
 
     // check whether keys are pressed
     unsigned char _KeyPressed = scale_GetKeyPressed();
@@ -104,18 +112,29 @@ void scale_StateManual(void)
         oScale.State = SYS_STATE_SHUTDOWN;
     }
 
-    // **Key1** - Backlight ON/OFF
+    // **Key1** - Zero Scale
     if (_KeyPressed & (1<<KEY1))
-        disp_BacklightToggle();
+        oScale.WeightOffset = 0x1000 - adc_GetValue();
     
-    // **Key2** - Zero Weight
+    // **Key2** - Zero Time
     if (_KeyPressed & (1<<KEY2))
         datScale.Time = 0;
     
     // **Key3** - Start/Stop Timer
     if (_KeyPressed & (1<<KEY3))
-        datScale.Time = 2222;
+        temp_timer_enable ^= 1;
 
+    // Temporary timing
+    if (temp_timer_enable)
+    {
+        if (taskScale.counter)
+            taskScale.counter--;
+        else
+        {
+            taskScale.counter = 5;
+            datScale.Time++;
+        }    
+    }
 };
 
 /**
@@ -153,12 +172,12 @@ void scale_InitTask(void)
     oScale.ScreenGUI        = GUI_SCREEN_MANUAL;
     oScale.KeyState[0]      = 0;
     oScale.KeyState[1]      = 0;
-    oScale.Calibration[0]   = 1;
-    oScale.Calibration[1]   = 0;
+    oScale.Calibration[0]   = 994; // [0.1*mg/LSB]
+    oScale.Calibration[1]   = -6561; // [mg]
     oScale.WeightOffset     = 0;
-    datScale.Weight         = 1234; // 0.1 [g]
+    datScale.Weight         = 0; // 0.1 [g]
     datScale.Time           = 754; // [s]
-    datScale.SoC            = 50; // [%]
+    datScale.SoC            = 0; // [%]
 
     /* Initialize ADC:
      * - ADC0 is Input
@@ -279,19 +298,20 @@ void scale_UpdateGUI(void)
 };
 
 /**
- * @brief Converts the ADC Sample to wight in [g], applies the calibration and the offset.
+ * @brief Converts the ADC Sample to weight in [g], applies the calibration.
  */
-void scale_ConvertSample(void)
+int scale_ConvertSample(unsigned int i_Sample)
 {
-    // Get ADC value
-    datScale.Weight = adc_GetValue();
-
-    // Apply the Tara or Offset
-    datScale.Weight -= oScale.WeightOffset;
+    // Convert the sign of the sample
+    long l_calc = (long) (0x1000 - i_Sample);
 
     // Apply Calibration: M = a*Sample + b
-    datScale.Weight *= oScale.Calibration[0];
-    datScale.Weight += oScale.Calibration[1];
+    l_calc *= oScale.Calibration[0];
+    l_calc /= 10;
+    // l_calc += oScale.Calibration[1];
+
+    // Convert from mg to 1/10g and return the value
+    return (signed int)(l_calc/100);
 };
 
 /**
@@ -313,4 +333,4 @@ void scale_GetSoC(void)
     }
     else // Start a new ADC conversion
         ADCSRA |= (1<<ADSC);   
-}
+};

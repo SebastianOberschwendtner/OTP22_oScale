@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    gui.c
  * @author  SO
- * @version V1.0
+ * @version V1.0.0
  * @date    22-November-2020
  * @brief   The GUI of the oScale.
  ******************************************************************************
@@ -210,8 +210,13 @@ unsigned char gui_WriteString(unsigned char x, unsigned char line, char *buffer)
  */
 unsigned char gui_WriteWeight(void)
 {
-    unsigned int _weight = datGUI->Weight;
+    unsigned int _weight = 0;
     unsigned int _digit = 0;
+
+    // Only when weight is positive
+    if (datGUI->Weight > 0)
+        _weight = (unsigned int)datGUI->Weight;
+
     //When display is not busy
     if (!disp_IsBusy())
     {

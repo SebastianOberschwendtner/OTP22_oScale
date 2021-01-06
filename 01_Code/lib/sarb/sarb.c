@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    sarb.c
  * @author  SO
- * @version V1.0
+ * @version V1.0.0
  * @date    22-November-2020
  * @brief   Simple arbiter for the use with 8bit microcontroller. Saves RAM.
  ******************************************************************************

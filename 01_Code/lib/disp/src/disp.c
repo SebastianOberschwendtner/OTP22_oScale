@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    disp.c
  * @author  SO
- * @version V1.0
+ * @version V1.0.0
  * @date    21-November-2020
  * @brief   Display controller for the scale. Tries to minimize RAM usage.
  ******************************************************************************

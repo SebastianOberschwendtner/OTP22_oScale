@@ -6,7 +6,7 @@
 ![release](https://img.shields.io/github/v/release/knuffel-v2/OTP22_oScale?color=green)
 ![issues](https://img.shields.io/github/issues-raw/knuffel-v2/OTP22_oScale)
 ![bugs](https://img.shields.io/github/issues/knuffel-v2/OTP22_oScale/bug?color=red)
-![Status](https://img.shields.io/badge/Status-Prototyping-yellowgreen)
+![Status](https://img.shields.io/badge/Status-Developing-yellowgreen)
 
 Open Source Scale for Brewing Espresso.
 
