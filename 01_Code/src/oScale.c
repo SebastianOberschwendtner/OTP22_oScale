@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    oScale.c
  * @author  SO
- * @version V1.0.0
+ * @version V1.0.1
  * @date    21-November-2020
  * @brief   Housekeeping/System functions of teh oScale
  ******************************************************************************
@@ -131,7 +131,7 @@ void scale_StateManual(void)
             taskScale.counter--;
         else
         {
-            taskScale.counter = 5;
+            taskScale.counter = 4;
             datScale.Time++;
         }    
     }
