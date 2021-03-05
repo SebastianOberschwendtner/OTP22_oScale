@@ -30,8 +30,8 @@
 #include "adc.h"
 
 // ****** Variables ******
-task_t taskADC; // Task struct for task data
-Filter_t ADCFilter;   // The filter struct for the ADC data.
+task_t taskADC;              // Task struct for task data
+uint16_Filter_t ADCFilter;   // The filter struct for the ADC data.
 
 // ****** Functions ******
 
@@ -48,7 +48,7 @@ Filter_t ADCFilter;   // The filter struct for the ADC data.
  */
 void Task_ADC(void)
 {
-    FilterPT1(adc_Sample(), &ADCFilter);
+    uint16_ApplyPT1(&ADCFilter, 40); //adc_Sample());
 };
 
 /**
@@ -69,12 +69,7 @@ void adc_InitTask(void)
      * - F_Sample: 100 Hz
      * - Time Constant: 0.5 s
      */
-    ADCFilter.Accumulated = (4096<<4); // Initialize the filter value for faster settling.
-    ADCFilter.SampleCount = 0;
-    ADCFilter.Value       = 0;
-    ADCFilter.Coefficient[0] = (100 * 0.5);
-    ADCFilter.Coefficient[1] = 0;
-    ADCFilter.Coefficient[2] = 0;
+    uint16_CreatePT1(&ADCFilter, 100, 1, 500);
 };
 
 /**
@@ -136,5 +131,5 @@ unsigned int adc_Sample(void)
  */
 unsigned int adc_GetValue(void)
 {
-    return ADCFilter.Value;
+    return ADCFilter.y[0];
 };
