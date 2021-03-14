@@ -48,10 +48,32 @@ class Filter_t():
     
     # ****** Methods ******
     def __init__(self) -> None:
-        self.a = np.zeros(3, dtype=np.uint16)
-        self.b = np.zeros(3, dtype=np.uint16)
+        self.a = np.zeros(3, dtype=np.uint32)
+        self.b = np.zeros(3, dtype=np.uint32)
         self.x = np.zeros(3, dtype=np.uint16)
-        self.y = np.zeros(3, dtype=np.uint16)
+        self.y = np.zeros(3, dtype=np.uint32)
+        self.scale = np.zeros(2, dtype=np.uint8)
+
+    def CreatePT1(self, Gain: float, T: float, Fs: float,
+            SampleBits:int, ExtraBitsResult: int):
+        # Reset the filter
+        self.__init__()
+
+        # Set the scaling bitshifts
+        self.scale[0] = ExtraBitsResult
+        self.scale[1] = 30 - SampleBits
+
+        # Calculate the a coefficients and scale them
+        self.a[0] = 1
+        _a1 = (T*Fs)/(1 + T*Fs)
+        _shift = self.scale[1] - self.scale[0]
+        self.a[1] = np.uint32( math.floor(_a1 * (2**_shift)) )
+
+        # calculate b coefficients and scale them
+        _b0 = Gain / (1 + T*Fs)
+        _shift = self.scale[1]
+        self.b[0] = np.uint32( math.floor(_b0 * (2**_shift)) )
+
 
     def __str__(self) -> str:
         print(f'a = {self.a}')
@@ -62,8 +84,107 @@ class Filter_t():
 
 
 # ****** Functions ******
-def main():
-    pass
+def CompareFixedStep( StepVal: int = 5, Duration: float = 10.0,
+        StartBits: int = 0, EndBits: int = 10):
+    """Compares the step response of a discrete filter with different
+    numbers of extra bits to increase filter resolution. The resulting
+    plots show the influence of the increased resolution versus the
+    increased rounding errors.
+
+    Args:
+        StepVal (int, optional): 1x1 The amplitude of the ideal step input. Defaults to 5.
+        Duration (float, optional): 1x1 The duration of the step intput. Defaults to 10.0.
+        StartBits (int, optional): 1x1 The number of extra bits when stopping the sweep. Defaults to 0.
+        EndBits (int, optional): 1x1 Th number of extra bits when starting the sweep. Defaults to 10.
+    
+    ---
+    """
+    # Define filter constants
+    Gain = 1.0
+    T = 0.3
+    Fs = 100
+
+    # Get number of samples
+    N_Samples = math.floor(Duration*Fs) + 1
+
+    # Create Filter
+    _filt = Filter_t()
+
+    # Calculate the responses
+    Response = []
+    for iBits in range(StartBits, EndBits + 1):
+        _response = []
+        _filt.CreatePT1( Gain, T, Fs, 12, iBits)
+
+        for iSample in range(N_Samples):
+            _response.append( ApplyIntegerFilter(_filt, StepVal))
+        
+        Response.append( _response )
+
+    fig = plt.figure()
+    plt.title('Time Response')
+    for i, iBits in enumerate(range(StartBits, EndBits + 1)):
+        plt.plot(Response[i], label=f'Extra Bits = {iBits}')
+    plt.legend()
+    plt.grid(True)
+
+    fig = plt.figure()
+    plt.title('Max Response Value')
+    _MaxResponse = []
+    for iResponse in Response:
+        _MaxResponse.append( 100*iResponse[-1]/StepVal )
+    plt.plot(range(StartBits, EndBits +1), _MaxResponse, '-o')
+    plt.xlabel('Number of extra bits')
+    plt.ylabel('Endvalue compared to input value in [%]')
+    plt.grid(True)
+    plt.show()
+
+def CompareVariableStep( StepVal: int = 5, Duration: float = 10.0,
+        StartBits: int = 0, EndBits: int = 10):
+    """Compares the maximum response of different numbers of extra bits of an discrete
+    filter. 
+
+    Args:
+        StepVal (int, optional): 1x1 The amplitude of the ideal step input. Defaults to 5.
+        Duration (float, optional): 1x1 The duration of the step intput. Defaults to 10.0.
+        StartBits (int, optional): 1x1 The number of extra bits when stopping the sweep. Defaults to 0.
+        EndBits (int, optional): 1x1 Th number of extra bits when starting the sweep. Defaults to 10.
+    
+    ---
+    """
+    # Define filter constants
+    Gain = 1.0
+    T = 0.3
+    Fs = 100
+    _filt = Filter_t()
+
+    # Get number of samples
+    N_Samples = math.floor(Duration*Fs) + 1
+    N_Sweeps = len( range(StartBits, EndBits + 1) )
+
+    # Initialize the response vector
+    Response = np.zeros((N_Sweeps, math.floor(StepVal/10)))
+
+    # Calculate the responses
+    # For every range of extra bits
+    for i, iBit in enumerate(range(StartBits, EndBits +1)):
+        # Get the filter response for one step amplitude
+        for k, iStep in enumerate(range(1, StepVal+1, 10)):
+            _response = []
+            _filt.CreatePT1(Gain, T, Fs, 12, iBit)
+            for iSample in range(N_Samples):
+                _response.append( ApplyIntegerFilter(_filt, iStep))
+            # The step value is the last response value
+            Response[i][k] = 100*_response[-1]/iStep
+
+    # Plot results
+    for i, iBit in enumerate(range(StartBits, EndBits +1)):
+        plt.plot(Response[i], label=f'Extra Bits = {iBit}')
+    plt.legend()
+    plt.grid(True)
+    plt.xlabel('Amplitude Step Input x0.1')
+    plt.ylabel('Endvalue compared to input value in [%]')
+    plt.show()
 
 def ApplyIntegerFilter(Filter: Filter_t, Sample: np.uint16) -> np.uint16:
     """Applies the filter to the input samples. The current filter value
@@ -79,18 +200,18 @@ def ApplyIntegerFilter(Filter: Filter_t, Sample: np.uint16) -> np.uint16:
     ---
     """
     # Update current Sample
-    Filter.x[0] = Sample * 16
+    Filter.x[0] = Sample
     
     # Apply the filter:
     # y0 = (b0*x0 + b1*x1 + a1*y1 + a2*y2) >> a0
-    Accumulator = 0;
+    Accumulator = 0
     Accumulator += np.uint32( Filter.b[0] )* Filter.x[0]
     Accumulator += np.uint32( Filter.b[1] )* Filter.x[1] 
     Accumulator += np.uint32( Filter.a[1] )* Filter.y[1] 
     Accumulator += np.uint32( Filter.a[2] )* Filter.y[2] 
 
-    Filter.y[0] = np.uint16(Accumulator >> 12)
-    #/@todo Replace the explicit calculation of the filtered value with the bitshifting
+    _shift = Filter.scale[1] - Filter.scale[0]
+    Filter.y[0] = np.uint32(Accumulator >> _shift)
 
     # Update the value arrays
     Filter.x[2] = Filter.x[1];
@@ -99,10 +220,8 @@ def ApplyIntegerFilter(Filter: Filter_t, Sample: np.uint16) -> np.uint16:
     Filter.y[1] = Filter.y[0];
 
 
-    return np.uint16( math.floor(Filter.y[0] / 16))
+    return np.uint16( Filter.y[0] >> Filter.scale[0] )
 
 # ****** Main ******
 if __name__ == "__main__":
-    filt = Filter_t()
-    filt.a[1] = 4015
-    filt.b[0] = 80
+   CompareVariableStep(StepVal=4000, StartBits=0, EndBits=10)
