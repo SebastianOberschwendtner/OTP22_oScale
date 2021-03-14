@@ -80,6 +80,12 @@ typedef struct   // Content data for display
 
 
 // ****** Functions ******
+void            disp_SetA0High              (void);
+void            disp_SetA0Low               (void);
+void            disp_SetCSHigh              (void);
+void            disp_SetCSLow               (void);
+void            disp_SetRSTHigh             (void);
+void            disp_SetRSTLow              (void);
 void            Task_Disp                   (void);
 void            disp_InitTask               (unsigned int us_per_tick);
 void            disp_Init                   (void);
