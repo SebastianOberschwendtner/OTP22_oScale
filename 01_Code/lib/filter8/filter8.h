@@ -22,41 +22,31 @@
 
 // ****** Defines ******
 // Struct for filtered data
-#pragma pack(push, 1)
-typedef struct
-{
-    unsigned int Value;         // The current value of the filter
-    unsigned long Accumulated;  // Accumulated data, also used as "calculation space"
-    unsigned char SampleCount;  // The number of accumulated samples 
-    unsigned int Coefficient[3];// Filter coefficients
-} Filter_t;
-#pragma pack(pop)
+// #pragma pack(push, 1)
+// typedef struct
+// {
+//     unsigned int Value;         // The current value of the filter
+//     unsigned long Accumulated;  // Accumulated data, also used as "calculation space"
+//     unsigned char SampleCount;  // The number of accumulated samples 
+//     unsigned int Coefficient[3];// Filter coefficients
+// } Filter_t;
+// #pragma pack(pop)
 
-// Struct for a filter type, measured value is 8-bit
-typedef struct
-{
-    unsigned char x[3];         // Array for measured values
-    unsigned char y[3];         // Array for filtered data
-    unsigned char a[3];         // Coefficients for filter denominator
-    unsigned char b[3];         // Coefficients for filter nominator
-} uint8_Filter_t;
-
-// Struct for a filter type, measured value is 16-bit
+// Struct for a IIR filter type
 typedef struct
 {
     unsigned int x[3];         // Array for measured values
-    unsigned int y[3];         // Array for filtered data
-    unsigned int a[3];         // Coefficients for filter denominator
-    unsigned int b[3];         // Coefficients for filter nominator
-} uint16_Filter_t;
+    unsigned long y[3];         // Array for filtered data
+    unsigned long a[3];         // Coefficients for filter denominator
+    unsigned long b[3];         // Coefficients for filter nominator
+    unsigned char ScaleBits;    // Number of bits for the coefficient scaling.
+    unsigned char ExtraBits;    // Number of extra bits for the internal calculations
+} IIR_Filter_t;
 
 // ****** Functions ******
-unsigned char   uint8_CreatePT1     (uint8_Filter_t* p_Filter, unsigned char Fs, unsigned char Gain, unsigned int T);
-unsigned char   uint16_CreatePT1    (uint16_Filter_t* p_Filter, unsigned int Fs, unsigned int Gain, unsigned int T);
-unsigned char   uint8_ApplyFilter   (uint8_Filter_t* p_Filter, unsigned char c_Sample_New);
-unsigned int    uint16_ApplyFilter  (uint16_Filter_t* p_Filter, unsigned int i_Sample_New);
-unsigned char   uint8_ApplyPT1      (uint8_Filter_t* p_Filter, unsigned char c_Sample_New);
-unsigned int    uint16_ApplyPT1     (uint16_Filter_t* p_Filter, unsigned int i_Sample_New);
-void            FilterAVG           (unsigned int i_Sample_New, Filter_t* p_Filter);
-void            FilterPT1           (unsigned int i_Sample_New, Filter_t* p_Filter);
+unsigned char   CreatePT1       (IIR_Filter_t* p_Filter, unsigned int Fs, unsigned int Gain, unsigned int T, unsigned char SampleBits, unsigned char ExtraBits);
+unsigned int    ApplyPT1        (IIR_Filter_t* p_Filter, unsigned int i_Sample_New);
+unsigned int    GetIIR          (IIR_Filter_t* p_Filter);
+// void            FilterAVG           (unsigned int i_Sample_New, Filter_t* p_Filter);
+// void            FilterPT1           (unsigned int i_Sample_New, Filter_t* p_Filter);
 #endif

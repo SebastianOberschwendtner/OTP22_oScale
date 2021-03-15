@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    adc.c
  * @author  SO
- * @version V1.0.0
+ * @version V1.0.2
  * @date    22-November-2020
  * @brief   Interfaces with the ADS7822P 12-bit ADC.
  ******************************************************************************
@@ -31,7 +31,7 @@
 
 // ****** Variables ******
 task_t taskADC;              // Task struct for task data
-uint16_Filter_t ADCFilter;   // The filter struct for the ADC data.
+IIR_Filter_t ADCFilter;   // The filter struct for the ADC data.
 
 // ****** Functions ******
 
@@ -48,7 +48,7 @@ uint16_Filter_t ADCFilter;   // The filter struct for the ADC data.
  */
 void Task_ADC(void)
 {
-    uint16_ApplyPT1(&ADCFilter, 40); //adc_Sample());
+    ApplyPT1(&ADCFilter, adc_Sample());
 };
 
 /**
@@ -69,7 +69,7 @@ void adc_InitTask(void)
      * - F_Sample: 100 Hz
      * - Time Constant: 0.5 s
      */
-    uint16_CreatePT1(&ADCFilter, 100, 1, 500);
+    CreatePT1(&ADCFilter, 100, 100, 300, 12, 4);
 };
 
 /**
@@ -131,5 +131,5 @@ unsigned int adc_Sample(void)
  */
 unsigned int adc_GetValue(void)
 {
-    return ADCFilter.y[0];
+    return GetIIR(&ADCFilter);
 };

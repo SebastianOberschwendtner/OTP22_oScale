@@ -36,7 +36,7 @@
 #include "adc.h"
 
 // ****** Defines ******
-#define VERSION "v1.0.1"
+#define VERSION "v1.0.2"
 
 /*
  * Task Schedule

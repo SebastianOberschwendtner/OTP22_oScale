@@ -6,6 +6,9 @@
 
 ### Release Notes:
 - [V1.0.1](https://github.com/knuffel-v2/OTP22_oScale/releases/tag/v1.0.1): Fixed Timing Issue (#9)
+- [V1.0.2](https://github.com/knuffel-v2/OTP22_oScale/releases/tag/v1.0.2): 
+    - After the update of *platformio*, the inline functions have to be inserted in the header files as well, otherwise the compiler complains. :shrug:
+    - Adds IIR filters to *filter8*. Available filters: **PT1**.
 
 ### Fixed Issues:
 

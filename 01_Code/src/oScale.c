@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    oScale.c
  * @author  SO
- * @version V1.0.1
+ * @version V1.0.2
  * @date    21-November-2020
  * @brief   Housekeeping/System functions of teh oScale
  ******************************************************************************
@@ -97,8 +97,7 @@ void scale_StateManual(void)
      * but is only precise to +-1g.
      */
     // datScale.Weight = scale_ConvertSample( adc_GetValue() );
-    // datScale.Weight = 0x1000 - adc_GetValue();
-    datScale.Weight = adc_GetValue();
+    datScale.Weight = 0x1000 - adc_GetValue();
     datScale.Weight -= oScale.WeightOffset;
 
     // check whether keys are pressed
