@@ -176,7 +176,7 @@ void scale_InitTask(void)
     oScale.Calibration[1]   = -6561; // [mg]
     oScale.WeightOffset     = 0;
     datScale.Weight         = 0; // 0.1 [g]
-    datScale.Time           = 754; // [s]
+    datScale.Time           = 0; // [s]
     datScale.SoC            = 0; // [%]
 
     /* Initialize ADC:
