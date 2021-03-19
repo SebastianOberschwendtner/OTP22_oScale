@@ -61,7 +61,7 @@ class Filter_t():
 
         # Set the scaling bitshifts
         self.scale[0] = ExtraBitsResult
-        self.scale[1] = 30 - SampleBits
+        self.scale[1] = 28 - SampleBits
 
         # Calculate the a coefficients and scale them
         self.a[0] = 1
@@ -121,12 +121,21 @@ def CompareFixedStep( StepVal: int = 5, Duration: float = 10.0,
         
         Response.append( _response )
 
+    # Create time vector for plotting
+    Time = []
+    for iSample in range(N_Samples):
+        Time.append( iSample/Fs )
+
+    # Plot Results
     fig = plt.figure()
-    plt.title('Time Response')
+    plt.rcParams.update({'font.size': 22})
+    plt.title(f'Time Response IIR - PT1, Step = {StepVal}')
     for i, iBits in enumerate(range(StartBits, EndBits + 1)):
-        plt.plot(Response[i], label=f'Extra Bits = {iBits}')
-    plt.legend()
+        plt.plot(Time, Response[i],'-o', label=f'Extra Bits = {iBits}')
+    #plt.legend()
     plt.grid(True)
+    plt.xlabel('Time in $[s]$')
+    plt.ylabel('Filtered Value')
 
     fig = plt.figure()
     plt.title('Max Response Value')
@@ -159,17 +168,19 @@ def CompareVariableStep( StepVal: int = 5, Duration: float = 10.0,
     _filt = Filter_t()
 
     # Get number of samples
+    _SampleStep = 50
     N_Samples = math.floor(Duration*Fs) + 1
     N_Sweeps = len( range(StartBits, EndBits + 1) )
 
     # Initialize the response vector
-    Response = np.zeros((N_Sweeps, math.floor(StepVal/10)))
+    Response = np.zeros((N_Sweeps, math.floor(StepVal/_SampleStep)))
+    _Steps = range(1, StepVal+1, _SampleStep)
 
     # Calculate the responses
     # For every range of extra bits
     for i, iBit in enumerate(range(StartBits, EndBits +1)):
         # Get the filter response for one step amplitude
-        for k, iStep in enumerate(range(1, StepVal+1, 10)):
+        for k, iStep in enumerate(range(1, StepVal+1, _SampleStep)):
             _response = []
             _filt.CreatePT1(Gain, T, Fs, 12, iBit)
             for iSample in range(N_Samples):
@@ -178,12 +189,17 @@ def CompareVariableStep( StepVal: int = 5, Duration: float = 10.0,
             Response[i][k] = 100*_response[-1]/iStep
 
     # Plot results
+    plt.figure()
+    plt.rcParams.update({'font.size': 22})
+    
     for i, iBit in enumerate(range(StartBits, EndBits +1)):
-        plt.plot(Response[i], label=f'Extra Bits = {iBit}')
-    plt.legend()
+        plt.plot(_Steps, Response[i], 'o',label=f'Extra Bits = {iBit}')
+
+    #plt.legend()
     plt.grid(True)
-    plt.xlabel('Amplitude Step Input x0.1')
-    plt.ylabel('Endvalue compared to input value in [%]')
+    plt.title('Settled value for different step amplitudes IIR - PT1', fontsize=28)
+    plt.xlabel('Amplitude Step Input', fontsize=28)
+    plt.ylabel('Settled value compared to input value in [%]', fontsize=28)
     plt.show()
 
 def ApplyIntegerFilter(Filter: Filter_t, Sample: np.uint16) -> np.uint16:
@@ -224,4 +240,5 @@ def ApplyIntegerFilter(Filter: Filter_t, Sample: np.uint16) -> np.uint16:
 
 # ****** Main ******
 if __name__ == "__main__":
-   CompareVariableStep(StepVal=4000, StartBits=0, EndBits=10)
+   CompareVariableStep(StepVal=4000, StartBits=0, EndBits=0)
+   #CompareFixedStep(StepVal=200, Duration=4, StartBits=0, EndBits=0)
