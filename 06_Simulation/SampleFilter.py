@@ -138,7 +138,7 @@ def CompareFixedStep( StepVal: int = 5, Duration: float = 10.0,
     plt.ylabel('Filtered Value')
 
     fig = plt.figure()
-    plt.title('Max Response Value')
+    plt.title(f'Max Time Response Value IIR - PT1, Step = {StepVal}')
     _MaxResponse = []
     for iResponse in Response:
         _MaxResponse.append( 100*iResponse[-1]/StepVal )
@@ -241,5 +241,5 @@ def ApplyIntegerFilter(Filter: Filter_t, Sample: np.uint16) -> np.uint16:
 
 # ****** Main ******
 if __name__ == "__main__":
-   CompareVariableStep(StepVal=4000, StartBits=0, EndBits=8, BitSteps=4)
-   #CompareFixedStep(StepVal=200, Duration=4, StartBits=0, EndBits=0)
+#    CompareVariableStep(StepVal=4000, StartBits=0, EndBits=8, BitSteps=4)
+   CompareFixedStep(StepVal=4000, Duration=4, StartBits=0, EndBits=10)
