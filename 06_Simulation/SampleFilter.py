@@ -149,7 +149,7 @@ def CompareFixedStep( StepVal: int = 5, Duration: float = 10.0,
     plt.show()
 
 def CompareVariableStep( StepVal: int = 5, Duration: float = 10.0,
-        StartBits: int = 0, EndBits: int = 10):
+        StartBits: int = 0, EndBits: int = 10, BitSteps: int = 1):
     """Compares the maximum response of different numbers of extra bits of an discrete
     filter. 
 
@@ -157,7 +157,8 @@ def CompareVariableStep( StepVal: int = 5, Duration: float = 10.0,
         StepVal (int, optional): 1x1 The amplitude of the ideal step input. Defaults to 5.
         Duration (float, optional): 1x1 The duration of the step intput. Defaults to 10.0.
         StartBits (int, optional): 1x1 The number of extra bits when stopping the sweep. Defaults to 0.
-        EndBits (int, optional): 1x1 Th number of extra bits when starting the sweep. Defaults to 10.
+        EndBits (int, optional): 1x1 The number of extra bits when starting the sweep. Defaults to 10.
+        BitSteps (int, optional): 1x1 The step size when iterating through the given range of extra bits. Defaults to 1.
     
     ---
     """
@@ -178,7 +179,7 @@ def CompareVariableStep( StepVal: int = 5, Duration: float = 10.0,
 
     # Calculate the responses
     # For every range of extra bits
-    for i, iBit in enumerate(range(StartBits, EndBits +1)):
+    for i, iBit in enumerate(range(StartBits, EndBits+1, BitSteps)):
         # Get the filter response for one step amplitude
         for k, iStep in enumerate(range(1, StepVal+1, _SampleStep)):
             _response = []
@@ -192,10 +193,10 @@ def CompareVariableStep( StepVal: int = 5, Duration: float = 10.0,
     plt.figure()
     plt.rcParams.update({'font.size': 22})
     
-    for i, iBit in enumerate(range(StartBits, EndBits +1)):
-        plt.plot(_Steps, Response[i], 'o',label=f'Extra Bits = {iBit}')
+    for i, iBit in enumerate(range(StartBits, EndBits+1, BitSteps)):
+        plt.plot(_Steps, Response[i], '-o',label=f'Extra Bits = {iBit}')
 
-    #plt.legend()
+    plt.legend()
     plt.grid(True)
     plt.title('Settled value for different step amplitudes IIR - PT1', fontsize=28)
     plt.xlabel('Amplitude Step Input', fontsize=28)
@@ -240,5 +241,5 @@ def ApplyIntegerFilter(Filter: Filter_t, Sample: np.uint16) -> np.uint16:
 
 # ****** Main ******
 if __name__ == "__main__":
-   CompareVariableStep(StepVal=4000, StartBits=0, EndBits=0)
+   CompareVariableStep(StepVal=4000, StartBits=0, EndBits=8, BitSteps=4)
    #CompareFixedStep(StepVal=200, Duration=4, StartBits=0, EndBits=0)
