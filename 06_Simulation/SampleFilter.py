@@ -40,9 +40,24 @@ Accumulator = np.uint32(0)
 
 # ****** Classes ******
 class Filter_t():
-    """Defines a discrete filter.
+    """
+    #### Description
 
+    This class defines a discrete filter.
+    
+    ### Attributes
+
+    |Name                |Access|Type    |Size |Unit           |Description|
+    |---                 |:---: |:---:   |:---:|:---:          |---        |
+    |**a**               |`R/W` |*uint32*| 1x3 |[-]            |The denominator filter coefficients of the discrete filter.|
+    |**b**               |`R/W` |*uint32*| 1x3 |[-]            |The nominator filter coefficients of the discrete filter.|
+    |**x**               |`R/W` |*uint16*| 1x3 |[-]            |Array with measured samples.|
+    |**y**               |`R/W` |*uint32*| 1x3 |[-]            |Array with filtered  values.|
+    |**scale**           |`R/W` |*uint8* | 1x2 |[-]            |Array with length of bitshifts for the coefficient scaling and the splitted coefficient scaling.|
+
+    ### Methods
     ---
+
     """
     # ****** Properties ******
     
@@ -56,6 +71,19 @@ class Filter_t():
 
     def CreatePT1(self, Gain: float, T: float, Fs: float,
             SampleBits:int, ExtraBitsResult: int):
+        """Calculate the filter coefficients for a PT1 filter type
+        with the specified characteristics.
+
+        Args:
+            Gain (float): [description]
+            T (float): [description]
+            Fs (float): [description]
+            SampleBits (int): [description]
+            ExtraBitsResult (int): [description]
+
+
+## Functions
+        """
         # Reset the filter
         self.__init__()
 
@@ -84,6 +112,7 @@ class Filter_t():
 
 
 # ****** Functions ******
+
 def CompareFixedStep( StepVal: int = 5, Duration: float = 10.0,
         StartBits: int = 0, EndBits: int = 10):
     """Compares the step response of a discrete filter with different
