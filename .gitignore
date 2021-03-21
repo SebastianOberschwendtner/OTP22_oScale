@@ -4,6 +4,9 @@
 # Ignore CM Exports
 20_CM_Exports
 
+# Ignore pydoc-markdown configuration
+pydoc-markdown.yml
+
 # ignore platformio outputs
 .pio
 
