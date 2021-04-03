@@ -3,9 +3,15 @@
 # For some reason, the flash checking of platformio does not work. That is
 # why avrdude is called via the terminal, which seems more robust.
 
-# Set Options
-DUDE=C:/SysGCC/avr/bin/avrdude.exe 
-DUDE_CONFIGURATION=C:/SysGCC/avr/bin/avrdude.conf 
+# Set Options depending on operating system
+if [[ "$OSTYPE" == "linux-gnu" ]]
+then
+    DUDE=avrdude
+    DUDE_CONFIGURATION=/etc/avrdude.conf
+else
+    DUDE=C:/SysGCC/avr/bin/avrdude.exe 
+    DUDE_CONFIGURATION=C:/SysGCC/avr/bin/avrdude.conf 
+fi
 DEVICE=m328p 
 PORT=usb 
 PROGRAMMER=atmelice_isp 
