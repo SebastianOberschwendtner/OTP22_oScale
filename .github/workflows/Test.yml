@@ -29,6 +29,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Install Platform Native
-      run: pio platform update native
+      run: pio platform install native
     - name: Run the Unit Tests
       run: pio test -d ./01_Code/ -e native
