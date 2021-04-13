@@ -1,7 +1,7 @@
 ![Card](../../wiki/01_Logo/Header_oScale_v001.png)
 # OTP22_oScale
 
-
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/knuffel-v2/OTP22_oScale/PlatformIO%20CI)
 ![tag](https://img.shields.io/github/v/tag/knuffel-v2/OTP22_oScale?color=green)
 ![release](https://img.shields.io/github/v/release/knuffel-v2/OTP22_oScale?color=green)
 ![issues](https://img.shields.io/github/issues-raw/knuffel-v2/OTP22_oScale)
