@@ -1,10 +1,10 @@
-name: PlatformIO Unittest
+name: Unit Test
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
