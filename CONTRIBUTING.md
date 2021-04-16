@@ -104,6 +104,7 @@ Symbols for commits:
 - :racehorse: `:racehorse:` Performance Improvement
 - :wrench: `:wrench:`Minor Improvement or Fix
 - :mag: `:mag:` Made Code More Readable
+- :8ball: `:8ball:` Add or Change Unittests
 - :memo: `:memo:` Improved Documentation
 - :nut_and_bolt: `:nut_and_bolt:` Hardware Uploads and Fixes
 - :tada: `:tada:` Celebrate New **Major** Releases!
