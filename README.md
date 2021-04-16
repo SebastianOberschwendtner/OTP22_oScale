@@ -16,8 +16,8 @@ Open Source Scale for Brewing Espresso.
 >:construction: The **schematic** and **PCB** are designed with *CircuitMaker*. The project can be found [here](https://circuitmaker.com/Projects/Details/SebastianOberschwendtner/OTP-22oScale).
 
 ## Software Framework
-![GitHub Build Status](https://img.shields.io/github/workflow/status/knuffel-v2/OTP22_oScale/PlatformIO%20CI)
-![GitHub Test Status](https://img.shields.io/github/workflow/status/knuffel-v2/OTP22_oScale/PlatformIO%20Unittest?label=test)
+![GitHub Build Status](https://img.shields.io/github/workflow/status/knuffel-v2/OTP22_oScale/Build%20Firmware)
+![GitHub Test Status](https://img.shields.io/github/workflow/status/knuffel-v2/OTP22_oScale/Unit%20Test?label=test)
 ![IDE2](https://img.shields.io/static/v1?label=IDE&message=VSCode&color=yellowgreen)
 ![GitHub top language](https://img.shields.io/github/languages/top/knuffel-v2/OTP22_oScale?color=brightgreen)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/knuffel-v2/OTP22_oScale)
