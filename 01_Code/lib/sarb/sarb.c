@@ -32,6 +32,7 @@
 // ****** Variables ******
 
 // ****** Functions ******
+
 /**
  * @brief Initialize the task struct of the task.
  * @param task Pointer to the task struct of the task.
