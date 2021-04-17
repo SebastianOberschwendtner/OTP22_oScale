@@ -1,16 +1,16 @@
 # Changelog for OTP-22 oScale
 
-## [V1.1.0](https://github.com/knuffel-v2/OTP22_oScale/releases/tag/v1.1.0) *(2021-xx-xx)*
+## [V2.0.0](https://github.com/knuffel-v2/OTP22_oScale/releases/tag/v2.0.0) *(2021-xx-xx)*
 
 >Released by `SO`
 
 ### Release Notes:
-- [V1.0.1](https://github.com/knuffel-v2/OTP22_oScale/releases/tag/v1.0.1): Fixed Timing Issue (#9)
-- [V1.0.2](https://github.com/knuffel-v2/OTP22_oScale/releases/tag/v1.0.2): 
+- [V1.1.0](https://github.com/knuffel-v2/OTP22_oScale/releases/tag/v1.1.0): 
+    - Fixed Timing Issue (#9)
     - After the update of *platformio*, the inline functions have to be inserted in the header files as well, otherwise the compiler complains. :shrug:
     - Adds IIR filters to *filter8*. Available filters: **PT1**.
     - The timer is now initialized with zero.
-- [V1.0.3](https://github.com/knuffel-v2/OTP22_oScale/releases/tag/v1.0.3): 
+    - Addes unit tests for: *scheduler*, *sarb*
 
 ### Fixed Issues:
 
