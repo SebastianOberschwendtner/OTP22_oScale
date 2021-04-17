@@ -26,6 +26,7 @@ Open Source Scale for Brewing Espresso.
 ## Branches
 |Name|Status|Description|
 |---|---|---|
-|**Main**|`active`| Main branch for developing with VSCode|
+|**main**|`active`| Main branch for developing with VSCode|
+|**unittest**|`stale`| Branch to test unit test framework and github actions.|
  
 ## Technical Data
