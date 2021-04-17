@@ -34,7 +34,7 @@
 
 /**
  * @brief Test the initialization of the arbiter task struct.
- * @details unittest
+ * @details unit test
  */
 void test_InitStruct(void)
 {
@@ -48,7 +48,7 @@ void test_InitStruct(void)
 
 /**
  * @brief Test the return of the arbiter.
- * @details unittest
+ * @details unit test
  */
 void test_return(void)
 {
