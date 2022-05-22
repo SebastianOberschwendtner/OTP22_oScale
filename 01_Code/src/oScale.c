@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    oScale.c
  * @author  SO
- * @version V1.0.2
+ * @version V1.0.3
  * @date    21-November-2020
  * @brief   Housekeeping/System functions of teh oScale
  ******************************************************************************
@@ -149,8 +149,8 @@ void scale_StateShutdown(void)
     else
         taskScale.counter++;
 
-    // After 3 TaskTicks, shut the system down
-    if (taskScale.counter == 2)
+    // After 3 TaskTicks or more, shut the system down
+    if (taskScale.counter >= 2)
         scale_SetONLow();
 };
 
